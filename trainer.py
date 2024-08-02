@@ -17,6 +17,7 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.'''
 
 import os
+import time
 
 import numpy as np
 import torch
@@ -55,6 +56,7 @@ class Trainer:
         self.model.train()
         loop = tqdm(enumerate(self.train_loader), total=len(self.train_loader), leave=False)
         for i, (input_, target) in loop:
+            tic = time.time()
             if i == self.config.test_steps:
                 break
             input_ = input_.to(self.device)
@@ -116,6 +118,10 @@ class Trainer:
             loop.set_postfix(loss=loss.item(), avr_loss = losses.avg,
                              acc=acc, avr_acc=accuracy.avg,
                              lr=self.optimizer.param_groups[0]['lr'])
+            speed = self.config.data["batch_size"] /(time.time()-tic)
+            self.wandb_logger.log({
+                "Speed" : speed
+            })
         return losses.avg, accuracy.avg
 
     def validate(self):
