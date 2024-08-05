@@ -1,8 +1,8 @@
 exp_num = 0
 
-dataset = 'celeba_spoof'
+dataset = 'LCC_FASD_spoof'
 
-multi_task_learning = True
+multi_task_learning = False
 
 evaluation = False
 
@@ -48,7 +48,7 @@ model= dict(model_type='Mobilenet3',
             width_mult = 0.75,
             pretrained=True,
             embeding_dim=1024,
-            imagenet_weights='./pretrained/mobilenetv3-small-0.75-86c972c3.pth')
+            imagenet_weights='./pretrained/MobileNet3_0.75_small.pth.tar')
 
 aug = dict(type_aug=None,
             alpha=0.5,
