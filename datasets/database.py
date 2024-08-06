@@ -78,6 +78,6 @@ def get_merge_datasets(config,train_transform,val_transform):
 
     train1 = CelebASpoofDataset(celeba_root,False,multi_learning =False,transform=train_transform)
     train2 = LccFasdDataset(lccfasd_root,protocol='train',transform=train_transform)
-    val = CelebASpoofDataset(celeba_root,test_mode=True,transform=val_transform)
+    val = LccFasdDataset(lccfasd_root,protocol='val',transform=val_transform)
     train_data = ConcatDataset([train1, train2])
     return train_data,val
