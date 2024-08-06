@@ -1,14 +1,15 @@
 exp_num = 0
 
-dataset = 'LCC_FASD_spoof'
+dataset = 'celeba_spoof'
+dataset2 ='LCC_FASD'
 
 multi_task_learning = False
 
-evaluation = False
+evaluation = True
 
 test_steps = None
 
-datasets = dict(LCCFASD_root='./LCC_FASDcropped',
+datasets = dict(LCCFASD_root='./LCC_FASDCut',
                 Celeba_root='./celeba_spoof/small',
                 Casia_root='./CASIA')
 
@@ -48,7 +49,7 @@ model= dict(model_type='Mobilenet3',
             width_mult = 0.75,
             pretrained=True,
             embeding_dim=1024,
-            imagenet_weights='./pretrained/MobileNet3_0.75_small.pth.tar')
+            imagenet_weights='./pretrained/mobilenetv3-small-0.75-86c972c3.pth')
 
 aug = dict(type_aug=None,
             alpha=0.5,

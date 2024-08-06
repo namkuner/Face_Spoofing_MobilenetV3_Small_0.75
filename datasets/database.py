@@ -21,7 +21,7 @@ from functools import partial
 from .celeba_spoof import CelebASpoofDataset
 from .casia_surf import CasiaSurfDataset
 from .lcc_fasd import LccFasdDataset
-
+from torch.utils.data import ConcatDataset
 def do_nothing(**args):
     pass
 
@@ -71,3 +71,13 @@ def get_datasets(config):
                 # 'external_test': partial(external_reader, **config.external.test_params)
                 }
     return datasets
+
+def get_merge_datasets(config,train_transform,val_transform):
+    celeba_root = config.datasets.Celeba_root
+    lccfasd_root = config.datasets.LCCFASD_root
+
+    train1 = CelebASpoofDataset(celeba_root,False,multi_learning =False,transform=train_transform)
+    train2 = LccFasdDataset(lccfasd_root,protocol='train',transform=train_transform)
+    val = CelebASpoofDataset(celeba_root,test_mode=True,transform=val_transform)
+    train_data = ConcatDataset([train1, train2])
+    return train_data,val

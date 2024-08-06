@@ -1,3 +1,4 @@
+
 '''MIT License
 Copyright (C) 2020 Prokofiev Kirill, Intel Corporation
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,9 +27,9 @@ from importlib import import_module
 import numpy as np
 import torch
 from attrdict import AttrDict as adict
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,ConcatDataset
 
-from datasets import get_datasets
+from datasets import get_datasets , get_merge_datasets
 from losses import (AMSoftmaxLoss, AngleSimpleLinear, SoftTripleLinear,
                     SoftTripleLoss)
 from models import mobilenetv2, mobilenetv3_large, mobilenetv3_small
@@ -175,19 +176,20 @@ def freeze_layers(model, open_layers):
 def make_dataset(config: dict, train_transform: object = None, val_transform: object = None, mode='train'):
     ''' make train, val or test datasets '''
     datasets = get_datasets(config)
-    train_data = datasets[config.dataset + '_train'](transform=train_transform)
-    val_data = datasets[config.dataset + '_val'](transform=val_transform)
-    # if config.test_dataset.type == 'LCC_FASD' and config.dataset == 'celeba_spoof':
-    #     test_data = datasets['LCC_FASD_combined'](transform=val_transform)
-    # else:
-    #     test_data = datasets[config.test_dataset.type + '_test'](transform=val_transform)
-    if mode == 'train':
-        return train_data, val_data
-    # else:
-    #     assert mode == 'eval'
-    #     return test_data
+    train_data,val_data =get_merge_datasets(config,train_transform,val_transform)
 
-def make_loader(train, val, config, sampler=None):
+
+    if config.test_dataset.type == 'LCC_FASD' and config.dataset == 'celeba_spoof':
+        test_data = datasets['LCC_FASD_combined'](transform=val_transform)
+    else:
+        test_data = datasets[config.test_dataset.type + '_test'](transform=val_transform)
+    if mode == 'train':
+        return train_data, val_data, test_data
+    else:
+        assert mode == 'eval'
+        return test_data
+
+def make_loader(train, val, test, config, sampler=None):
     ''' make data loader from given train and val dataset
     train, val -> train loader, val loader'''
     if sampler:
@@ -202,11 +204,11 @@ def make_loader(train, val, config, sampler=None):
                                                 shuffle=True, pin_memory=config.data.pin_memory,
                                                 num_workers=config.data.data_loader_workers)
 
-    # test_loader = DataLoader(dataset=test, batch_size=config.data.batch_size,
-    #                                             shuffle=True, pin_memory=config.data.pin_memory,
-    #                                             num_workers=config.data.data_loader_workers)
+    test_loader = DataLoader(dataset=test, batch_size=config.data.batch_size,
+                                                shuffle=True, pin_memory=config.data.pin_memory,
+                                                num_workers=config.data.data_loader_workers)
 
-    return train_loader, val_loader
+    return train_loader, val_loader, test_loader
 
 def build_model(config, device, strict=True, mode='train'):
     ''' build model and change layers depends on loss type'''
